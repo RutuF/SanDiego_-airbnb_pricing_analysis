@@ -1,0 +1,16 @@
+-- =============================================
+-- Room Type Pricing Analysis
+-- Business Question: Which room type commands
+-- highest price and best reviews?
+-- =============================================
+
+SELECT
+    room_type,
+    COUNT(*) AS total_listings,
+    ROUND(AVG(price), 2) AS avg_price,
+    MIN(price) AS min_price,
+    MAX(price) AS max_price,
+    ROUND(AVG(review_scores_rating), 2) AS avg_reviews
+FROM listings
+GROUP BY room_type
+ORDER BY avg_price DESC;
