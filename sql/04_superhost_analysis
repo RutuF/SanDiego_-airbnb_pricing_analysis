@@ -1,0 +1,29 @@
+-- =============================================
+-- Superhost vs Regular Host Analysis
+-- Business Question: Do superhosts charge more
+-- and get better reviews?
+-- =============================================
+
+WITH superhost_stats AS (
+    SELECT
+        host_is_superhost,
+        COUNT(*) AS total_listings,
+        ROUND(AVG(price), 2) AS avg_price,
+        ROUND(AVG(review_scores_rating), 2) AS avg_review_score,
+        ROUND(AVG(number_of_reviews), 2) AS avg_reviews,
+        ROUND(AVG(availability_365), 2) AS avg_availability
+    FROM listings
+    WHERE host_is_superhost IS NOT NULL
+    GROUP BY host_is_superhost
+)
+SELECT
+    CASE
+        WHEN host_is_superhost = 't' THEN 'Superhost'
+        ELSE 'Regular Host'
+    END AS host_type,
+    total_listings,
+    avg_price,
+    avg_review_score,
+    avg_reviews,
+    avg_availability
+FROM superhost_stats;
