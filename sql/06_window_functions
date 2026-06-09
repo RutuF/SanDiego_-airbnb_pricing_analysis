@@ -1,0 +1,32 @@
+-- =============================================
+-- Window Function Analysis
+-- Business Question: Which listings are 
+-- overpriced or underpriced compared to
+-- their neighbourhood average?
+-- =============================================
+
+SELECT
+    name,
+    neighbourhood_cleansed,
+    price AS listing_price,
+    ROUND(AVG(price) OVER (
+        PARTITION BY neighbourhood_cleansed
+    ), 2) AS neighbourhood_avg,
+    ROUND(price - AVG(price) OVER (
+        PARTITION BY neighbourhood_cleansed
+    ), 2) AS difference,
+    CASE
+        WHEN price > AVG(price) OVER (
+            PARTITION BY neighbourhood_cleansed)
+        THEN 'Overpriced'
+        WHEN price < AVG(price) OVER (
+            PARTITION BY neighbourhood_cleansed)
+        THEN 'Underpriced'
+        ELSE 'Fair Price'
+    END AS pricing_status,
+    RANK() OVER (
+        PARTITION BY neighbourhood_cleansed
+        ORDER BY price DESC
+    ) AS price_rank_in_neighbourhood
+FROM listings
+ORDER BY neighbourhood_cleansed, difference DESC;
