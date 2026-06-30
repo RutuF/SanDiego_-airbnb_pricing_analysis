@@ -1,18 +1,28 @@
 -- =============================================
 -- Neighbourhood Pricing Analysis
--- Business Question: Which neighbourhoods have
--- highest average prices and most listings?
+-- Business Question: Which neighbourhoods offer the best value?
 -- =============================================
 
-SELECT
+WITH neighbourhood_median AS (
+    SELECT 
+        neighbourhood_cleansed,
+        COUNT(*) AS total_listings,
+        ROUND(CAST(PERCENTILE_CONT(0.5) WITHIN GROUP 
+            (ORDER BY price::NUMERIC) AS NUMERIC), 2) AS median_price,
+        MIN(price::NUMERIC) AS min_price,
+        MAX(price::NUMERIC) AS max_price,
+        ROUND(AVG(review_scores_rating::NUMERIC), 2) AS avg_review_score
+    FROM listings
+    GROUP BY neighbourhood_cleansed
+    HAVING COUNT(*) >= 20
+)
+SELECT 
     neighbourhood_cleansed,
-    COUNT(*) AS total_listings,
-    ROUND(AVG(price), 2) AS avg_price,
-    MIN(price) AS min_price,
-    MAX(price) AS max_price,
-    ROUND(AVG(review_scores_rating), 2) AS avg_review_score,
-    RANK() OVER (ORDER BY AVG(price) DESC) AS price_rank
-FROM listings
-GROUP BY neighbourhood_cleansed
-HAVING COUNT(*) >= 20
-ORDER BY avg_price DESC;
+    total_listings,
+    median_price,
+    min_price,
+    max_price,
+    avg_review_score,
+    RANK() OVER (ORDER BY median_price DESC) AS price_rank
+FROM neighbourhood_median
+ORDER BY median_price DESC;
