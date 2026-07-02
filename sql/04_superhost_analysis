@@ -8,10 +8,10 @@ WITH superhost_stats AS (
     SELECT
         host_is_superhost,
         COUNT(*) AS total_listings,
-        ROUND(AVG(price), 2) AS avg_price,
-        ROUND(AVG(review_scores_rating), 2) AS avg_review_score,
-        ROUND(AVG(number_of_reviews), 2) AS avg_reviews,
-        ROUND(AVG(availability_365), 2) AS avg_availability
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price::NUMERIC) AS median_price,
+        ROUND(AVG(review_scores_rating::NUMERIC), 2) AS avg_review_score,
+        ROUND(AVG(number_of_reviews::NUMERIC), 2) AS avg_reviews,
+        ROUND(AVG(availability_365::NUMERIC), 2) AS avg_availability
     FROM listings
     WHERE host_is_superhost IS NOT NULL
     GROUP BY host_is_superhost
@@ -22,7 +22,7 @@ SELECT
         ELSE 'Regular Host'
     END AS host_type,
     total_listings,
-    avg_price,
+    ROUND(median_price::NUMERIC, 2) AS median_price,
     avg_review_score,
     avg_reviews,
     avg_availability
